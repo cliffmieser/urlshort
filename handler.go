@@ -10,15 +10,18 @@ import (
 // that each key in the map points to, in string format).
 // If the path is not provided in the map, then the fallback
 // http.Handler will be called instead.
-func MapHandler(pathsToUrls map[string]string, fallback http.Handler) http.HandlerFunc {
+func MapHandler(pathsToUrls map[string]string, fallback http.Handler) http.HandlerFunc { // runs once routes set up
 	//	TODO: Implement this...
-	return func(w ResponseWriter, r *Request) { // parameters come from HandlerFunc type definition
-		/*
-			Things inside scope of the body:
-			- Own parameters (w and r)
-			- outer function parameters (pathsToUrls and fallback)
-			- package-level things (fmt, ect)
-		*/
+	// Where:
+	// r: an interface that decides how responses get written
+	// w: struct describing data of the INCOMING request, with fields to be read
+	return func(w http.ResponseWriter, r *http.Request) { // parameters come from HandlerFunc type definition, run once per request
+		path := r.URL.Path                     // pulls requested path out of the request
+		if dest, ok := pathsToUrls[path]; ok { //if ok, dest will have a value
+			http.Redirect(w, r, dest, http.StatusFound) // redirect response
+			return
+		}
+		fallback.ServeHTTP(w, r) // runs if path is not in the map
 	}
 
 }
